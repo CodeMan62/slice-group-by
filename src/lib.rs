@@ -12,7 +12,8 @@
 //!
 //! let slice = &[1, 1, 1, 3, 3, 2, 2, 2];
 //!
-//! let mut iter = slice.linear_group_by_key(|x| -x);
+//! // Group by equality
+//! let mut iter = slice.linear_group();
 //!
 //! assert_eq!(iter.next(), Some(&[1, 1, 1][..]));
 //! assert_eq!(iter.next(), Some(&[3, 3][..]));
@@ -281,12 +282,12 @@ where
 pub trait GroupBy<T> {
     /// Returns an iterator on slice groups based that will use the given function to generate keys
     /// and determine groups based on them. It uses *linear search* to iterate over groups.
-    fn linear_group_by_key<'a, F, K>(&'a self, func: F) -> LinearGroupByKey<T, F>
+    fn linear_group_by_key<'a, F, K>(&'a self, func: F) -> LinearGroupByKey<'a, T, F>
     where
         F: FnMut(&'a T) -> K,
         K: PartialEq;
     /// Returns an iterator on slice groups using the *linear search* method.
-    fn linear_group_by<P>(&self, predicate: P) -> LinearGroupBy<T, P>
+    fn linear_group_by<'a, P>(&'a self, predicate: P) -> LinearGroupBy<'a, T, P>
     where
         P: FnMut(&T, &T) -> bool;
 
@@ -303,16 +304,16 @@ pub trait GroupBy<T> {
     ///
     /// The predicate function should implement an order consistent with
     /// the sort order of the slice.
-    fn binary_group_by_key<F, K>(&self, func: F) -> BinaryGroupByKey<T, F>
+    fn binary_group_by_key<'a, F, K>(&'a self, func: F) -> BinaryGroupByKey<'a, T, F>
     where
-        F: FnMut(&T) -> K,
+        F: FnMut(&'a T) -> K,
         K: PartialEq;
 
     /// Returns an iterator on slice groups using the *binary search* method.
     ///
     /// The predicate function should implement an order consistent with
     /// the sort order of the slice.
-    fn binary_group_by<P>(&self, predicate: P) -> BinaryGroupBy<T, P>
+    fn binary_group_by<'a, P>(&'a self, predicate: P) -> BinaryGroupBy<'a, T, P>
     where
         P: FnMut(&T, &T) -> bool;
 
@@ -332,16 +333,16 @@ pub trait GroupBy<T> {
     ///
     /// The predicate function should implement an order consistent with
     /// the sort order of the slice.
-    fn exponential_group_by_key<F, K>(&self, func: F) -> ExponentialGroupByKey<T, F>
+    fn exponential_group_by_key<'a, F, K>(&'a self, func: F) -> ExponentialGroupByKey<'a, T, F>
     where
-        F: Fn(&T) -> K,
+        F: Fn(&'a T) -> K,
         K: PartialEq;
 
     /// Returns an iterator on slice groups using the *exponential search* method.
     ///
     /// The predicate function should implement an order consistent with
     /// the sort order of the slice.
-    fn exponential_group_by<P>(&self, predicate: P) -> ExponentialGroupBy<T, P>
+    fn exponential_group_by<'a, P>(&'a self, predicate: P) -> ExponentialGroupBy<'a, T, P>
     where
         P: FnMut(&T, &T) -> bool;
 
@@ -363,13 +364,13 @@ pub trait GroupByMut<T> {
     /// Returns an iterator on *mutable* slice groups based that will use the given function
     /// to generate keys and determine groups based on them. It uses *linear search*
     /// to iterate over groups.
-    fn linear_group_by_key_mut<F, K>(&mut self, func: F) -> LinearGroupByKeyMut<T, F>
+    fn linear_group_by_key_mut<'a, F, K>(&'a mut self, func: F) -> LinearGroupByKeyMut<'a, T, F>
     where
-        F: FnMut(&T) -> K,
+        F: FnMut(&'a T) -> K,
         K: PartialEq;
 
     /// Returns an iterator on *mutable* slice groups using the *linear search* method.
-    fn linear_group_by_mut<P>(&mut self, predicate: P) -> LinearGroupByMut<T, P>
+    fn linear_group_by_mut<'a, P>(&'a mut self, predicate: P) -> LinearGroupByMut<'a, T, P>
     where
         P: FnMut(&T, &T) -> bool;
 
@@ -387,16 +388,16 @@ pub trait GroupByMut<T> {
     ///
     /// The predicate function should implement an order consistent with
     /// the sort order of the slice.
-    fn binary_group_by_key_mut<F, K>(&mut self, func: F) -> BinaryGroupByKeyMut<T, F>
+    fn binary_group_by_key_mut<'a, F, K>(&'a mut self, func: F) -> BinaryGroupByKeyMut<'a, T, F>
     where
-        F: FnMut(&T) -> K,
+        F: FnMut(&'a T) -> K,
         K: PartialEq;
 
     /// Returns an iterator on *mutable* slice groups using the *binary search* method.
     ///
     /// The predicate function should implement an order consistent with
     /// the sort order of the slice.
-    fn binary_group_by_mut<P>(&mut self, predicate: P) -> BinaryGroupByMut<T, P>
+    fn binary_group_by_mut<'a, P>(&'a mut self, predicate: P) -> BinaryGroupByMut<'a, T, P>
     where
         P: FnMut(&T, &T) -> bool;
 
@@ -417,16 +418,22 @@ pub trait GroupByMut<T> {
     ///
     /// The predicate function should implement an order consistent with
     /// the sort order of the slice.
-    fn exponential_group_by_key_mut<F, K>(&mut self, func: F) -> ExponentialGroupByKeyMut<T, F>
+    fn exponential_group_by_key_mut<'a, F, K>(
+        &'a mut self,
+        func: F,
+    ) -> ExponentialGroupByKeyMut<'a, T, F>
     where
-        F: Fn(&T) -> K,
+        F: Fn(&'a T) -> K,
         K: PartialEq;
 
     /// Returns an iterator on *mutable* slice groups using the *exponential search* method.
     ///
     /// The predicate function should implement an order consistent with
     /// the sort order of the slice.
-    fn exponential_group_by_mut<P>(&mut self, predicate: P) -> ExponentialGroupByMut<T, P>
+    fn exponential_group_by_mut<'a, P>(
+        &'a mut self,
+        predicate: P,
+    ) -> ExponentialGroupByMut<'a, T, P>
     where
         P: FnMut(&T, &T) -> bool;
 
@@ -443,7 +450,7 @@ pub trait GroupByMut<T> {
 }
 
 impl<T> GroupBy<T> for [T] {
-    fn linear_group_by_key<'a, F, K>(&'a self, func: F) -> LinearGroupByKey<T, F>
+    fn linear_group_by_key<'a, F, K>(&'a self, func: F) -> LinearGroupByKey<'a, T, F>
     where
         F: FnMut(&'a T) -> K,
         K: PartialEq,
@@ -451,7 +458,7 @@ impl<T> GroupBy<T> for [T] {
         LinearGroupByKey::new(self, func)
     }
 
-    fn linear_group_by<P>(&self, predicate: P) -> LinearGroupBy<T, P>
+    fn linear_group_by<'a, P>(&'a self, predicate: P) -> LinearGroupBy<'a, T, P>
     where
         P: FnMut(&T, &T) -> bool,
     {
@@ -465,15 +472,15 @@ impl<T> GroupBy<T> for [T] {
         LinearGroup::new(self)
     }
 
-    fn binary_group_by_key<F, K>(&self, func: F) -> BinaryGroupByKey<T, F>
+    fn binary_group_by_key<'a, F, K>(&'a self, func: F) -> BinaryGroupByKey<'a, T, F>
     where
-        F: FnMut(&T) -> K,
+        F: FnMut(&'a T) -> K,
         K: PartialEq,
     {
         BinaryGroupByKey::new(self, func)
     }
 
-    fn binary_group_by<P>(&self, predicate: P) -> BinaryGroupBy<T, P>
+    fn binary_group_by<'a, P>(&'a self, predicate: P) -> BinaryGroupBy<'a, T, P>
     where
         P: FnMut(&T, &T) -> bool,
     {
@@ -487,15 +494,15 @@ impl<T> GroupBy<T> for [T] {
         BinaryGroup::new(self)
     }
 
-    fn exponential_group_by_key<F, K>(&self, func: F) -> ExponentialGroupByKey<T, F>
+    fn exponential_group_by_key<'a, F, K>(&'a self, func: F) -> ExponentialGroupByKey<'a, T, F>
     where
-        F: Fn(&T) -> K,
+        F: Fn(&'a T) -> K,
         K: PartialEq,
     {
         ExponentialGroupByKey::new(self, func)
     }
 
-    fn exponential_group_by<P>(&self, predicate: P) -> ExponentialGroupBy<T, P>
+    fn exponential_group_by<'a, P>(&'a self, predicate: P) -> ExponentialGroupBy<'a, T, P>
     where
         P: FnMut(&T, &T) -> bool,
     {
@@ -511,15 +518,15 @@ impl<T> GroupBy<T> for [T] {
 }
 
 impl<T> GroupByMut<T> for [T] {
-    fn linear_group_by_key_mut<F, K>(&mut self, func: F) -> LinearGroupByKeyMut<T, F>
+    fn linear_group_by_key_mut<'a, F, K>(&'a mut self, func: F) -> LinearGroupByKeyMut<'a, T, F>
     where
-        F: FnMut(&T) -> K,
+        F: FnMut(&'a T) -> K,
         K: PartialEq,
     {
         LinearGroupByKeyMut::new(self, func)
     }
 
-    fn linear_group_by_mut<P>(&mut self, predicate: P) -> LinearGroupByMut<T, P>
+    fn linear_group_by_mut<'a, P>(&'a mut self, predicate: P) -> LinearGroupByMut<'a, T, P>
     where
         P: FnMut(&T, &T) -> bool,
     {
@@ -533,15 +540,15 @@ impl<T> GroupByMut<T> for [T] {
         LinearGroupMut::new(self)
     }
 
-    fn binary_group_by_key_mut<F, K>(&mut self, func: F) -> BinaryGroupByKeyMut<T, F>
+    fn binary_group_by_key_mut<'a, F, K>(&'a mut self, func: F) -> BinaryGroupByKeyMut<'a, T, F>
     where
-        F: FnMut(&T) -> K,
+        F: FnMut(&'a T) -> K,
         K: PartialEq,
     {
         BinaryGroupByKeyMut::new(self, func)
     }
 
-    fn binary_group_by_mut<P>(&mut self, predicate: P) -> BinaryGroupByMut<T, P>
+    fn binary_group_by_mut<'a, P>(&'a mut self, predicate: P) -> BinaryGroupByMut<'a, T, P>
     where
         P: FnMut(&T, &T) -> bool,
     {
@@ -555,15 +562,21 @@ impl<T> GroupByMut<T> for [T] {
         BinaryGroupMut::new(self)
     }
 
-    fn exponential_group_by_key_mut<F, K>(&mut self, func: F) -> ExponentialGroupByKeyMut<T, F>
+    fn exponential_group_by_key_mut<'a, F, K>(
+        &'a mut self,
+        func: F,
+    ) -> ExponentialGroupByKeyMut<'a, T, F>
     where
-        F: Fn(&T) -> K,
+        F: Fn(&'a T) -> K,
         K: PartialEq,
     {
         ExponentialGroupByKeyMut::new(self, func)
     }
 
-    fn exponential_group_by_mut<P>(&mut self, predicate: P) -> ExponentialGroupByMut<T, P>
+    fn exponential_group_by_mut<'a, P>(
+        &'a mut self,
+        predicate: P,
+    ) -> ExponentialGroupByMut<'a, T, P>
     where
         P: FnMut(&T, &T) -> bool,
     {
@@ -584,13 +597,13 @@ pub trait StrGroupBy {
     /// Returns an iterator on `str` groups based that will use the given function
     /// to generate keys and determine groups based on them. It uses *linear search*
     /// to iterate over groups.
-    fn linear_group_by_key<F, K>(&self, func: F) -> LinearStrGroupByKey<F>
+    fn linear_group_by_key<'a, F, K>(&'a self, func: F) -> LinearStrGroupByKey<'a, F>
     where
         F: FnMut(char) -> K,
         K: PartialEq;
 
     /// Returns an iterator on `str` groups using the *linear search* method.
-    fn linear_group_by<P>(&self, predicate: P) -> LinearStrGroupBy<P>
+    fn linear_group_by<'a, P>(&'a self, predicate: P) -> LinearStrGroupBy<'a, P>
     where
         P: FnMut(char, char) -> bool;
 
@@ -607,13 +620,13 @@ pub trait StrGroupByMut {
     /// Returns an iterator on *mutable* `str` groups based that will use the given function
     /// to generate keys and determine groups based on them. It uses *linear search*
     /// to iterate over groups.
-    fn linear_group_by_key_mut<F, K>(&mut self, func: F) -> LinearStrGroupByKeyMut<F>
+    fn linear_group_by_key_mut<'a, F, K>(&'a mut self, func: F) -> LinearStrGroupByKeyMut<'a, F>
     where
         F: FnMut(char) -> K,
         K: PartialEq;
 
     /// Returns an iterator on *mutable* `str` groups using the *linear search* method.
-    fn linear_group_by_mut<P>(&mut self, predicate: P) -> LinearStrGroupByMut<P>
+    fn linear_group_by_mut<'a, P>(&'a mut self, predicate: P) -> LinearStrGroupByMut<'a, P>
     where
         P: FnMut(char, char) -> bool;
 
@@ -625,7 +638,7 @@ pub trait StrGroupByMut {
 }
 
 impl StrGroupBy for str {
-    fn linear_group_by_key<F, K>(&self, func: F) -> LinearStrGroupByKey<F>
+    fn linear_group_by_key<'a, F, K>(&'a self, func: F) -> LinearStrGroupByKey<'a, F>
     where
         F: FnMut(char) -> K,
         K: PartialEq,
@@ -633,7 +646,7 @@ impl StrGroupBy for str {
         LinearStrGroupByKey::new(self, func)
     }
 
-    fn linear_group_by<P>(&self, predicate: P) -> LinearStrGroupBy<P>
+    fn linear_group_by<'a, P>(&'a self, predicate: P) -> LinearStrGroupBy<'a, P>
     where
         P: FnMut(char, char) -> bool,
     {
@@ -646,7 +659,7 @@ impl StrGroupBy for str {
 }
 
 impl StrGroupByMut for str {
-    fn linear_group_by_key_mut<F, K>(&mut self, func: F) -> LinearStrGroupByKeyMut<F>
+    fn linear_group_by_key_mut<'a, F, K>(&'a mut self, func: F) -> LinearStrGroupByKeyMut<'a, F>
     where
         F: FnMut(char) -> K,
         K: PartialEq,
@@ -654,7 +667,7 @@ impl StrGroupByMut for str {
         LinearStrGroupByKeyMut::new(self, func)
     }
 
-    fn linear_group_by_mut<P>(&mut self, predicate: P) -> LinearStrGroupByMut<P>
+    fn linear_group_by_mut<'a, P>(&'a mut self, predicate: P) -> LinearStrGroupByMut<'a, P>
     where
         P: FnMut(char, char) -> bool,
     {
