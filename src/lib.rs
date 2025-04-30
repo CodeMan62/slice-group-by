@@ -289,7 +289,7 @@ pub trait GroupBy<T> {
     /// Returns an iterator on slice groups using the *linear search* method.
     fn linear_group_by<'a, P>(&'a self, predicate: P) -> LinearGroupBy<'a, T, P>
     where
-        P: FnMut(&T, &T) -> bool;
+        P: FnMut(&'a T, &'a T) -> bool;
 
     /// Returns an iterator on slice groups based on the [`PartialEq::eq`] method of `T`,
     /// it uses *linear search* to iterate over groups.
@@ -315,7 +315,7 @@ pub trait GroupBy<T> {
     /// the sort order of the slice.
     fn binary_group_by<'a, P>(&'a self, predicate: P) -> BinaryGroupBy<'a, T, P>
     where
-        P: FnMut(&T, &T) -> bool;
+        P: FnMut(&'a T, &'a T) -> bool;
 
     /// Returns an iterator on slice groups based on the [`PartialEq::eq`] method of `T`,
     /// it uses *binary search* to iterate over groups.
@@ -344,7 +344,7 @@ pub trait GroupBy<T> {
     /// the sort order of the slice.
     fn exponential_group_by<'a, P>(&'a self, predicate: P) -> ExponentialGroupBy<'a, T, P>
     where
-        P: FnMut(&T, &T) -> bool;
+        P: FnMut(&'a T, &'a T) -> bool;
 
     /// Returns an iterator on slice groups based on the [`PartialEq::eq`] method of `T`,
     /// it uses *exponential search* to iterate over groups.
@@ -372,7 +372,7 @@ pub trait GroupByMut<T> {
     /// Returns an iterator on *mutable* slice groups using the *linear search* method.
     fn linear_group_by_mut<'a, P>(&'a mut self, predicate: P) -> LinearGroupByMut<'a, T, P>
     where
-        P: FnMut(&T, &T) -> bool;
+        P: FnMut(&'a T, &'a T) -> bool;
 
     /// Returns an iterator on *mutable* slice groups based on the [`PartialEq::eq`] method of `T`,
     /// it uses *linear search* to iterate over groups.
@@ -399,7 +399,7 @@ pub trait GroupByMut<T> {
     /// the sort order of the slice.
     fn binary_group_by_mut<'a, P>(&'a mut self, predicate: P) -> BinaryGroupByMut<'a, T, P>
     where
-        P: FnMut(&T, &T) -> bool;
+        P: FnMut(&'a T, &'a T) -> bool;
 
     /// Returns an iterator on *mutable* slice groups based on the [`PartialEq::eq`] method of `T`,
     /// it uses *binary search* to iterate over groups.
@@ -435,7 +435,7 @@ pub trait GroupByMut<T> {
         predicate: P,
     ) -> ExponentialGroupByMut<'a, T, P>
     where
-        P: FnMut(&T, &T) -> bool;
+        P: FnMut(&'a T, &'a T) -> bool;
 
     /// Returns an iterator on *mutable* slice groups based on the [`PartialEq::eq`] method of `T`,
     /// it uses *exponential search* to iterate over groups.
@@ -460,7 +460,7 @@ impl<T> GroupBy<T> for [T] {
 
     fn linear_group_by<'a, P>(&'a self, predicate: P) -> LinearGroupBy<'a, T, P>
     where
-        P: FnMut(&T, &T) -> bool,
+        P: FnMut(&'a T, &'a T) -> bool,
     {
         LinearGroupBy::new(self, predicate)
     }
@@ -482,7 +482,7 @@ impl<T> GroupBy<T> for [T] {
 
     fn binary_group_by<'a, P>(&'a self, predicate: P) -> BinaryGroupBy<'a, T, P>
     where
-        P: FnMut(&T, &T) -> bool,
+        P: FnMut(&'a T, &'a T) -> bool,
     {
         BinaryGroupBy::new(self, predicate)
     }
@@ -504,7 +504,7 @@ impl<T> GroupBy<T> for [T] {
 
     fn exponential_group_by<'a, P>(&'a self, predicate: P) -> ExponentialGroupBy<'a, T, P>
     where
-        P: FnMut(&T, &T) -> bool,
+        P: FnMut(&'a T, &'a T) -> bool,
     {
         ExponentialGroupBy::new(self, predicate)
     }
@@ -528,7 +528,7 @@ impl<T> GroupByMut<T> for [T] {
 
     fn linear_group_by_mut<'a, P>(&'a mut self, predicate: P) -> LinearGroupByMut<'a, T, P>
     where
-        P: FnMut(&T, &T) -> bool,
+        P: FnMut(&'a T, &'a T) -> bool,
     {
         LinearGroupByMut::new(self, predicate)
     }
@@ -550,7 +550,7 @@ impl<T> GroupByMut<T> for [T] {
 
     fn binary_group_by_mut<'a, P>(&'a mut self, predicate: P) -> BinaryGroupByMut<'a, T, P>
     where
-        P: FnMut(&T, &T) -> bool,
+        P: FnMut(&'a T, &'a T) -> bool,
     {
         BinaryGroupByMut::new(self, predicate)
     }
@@ -578,7 +578,7 @@ impl<T> GroupByMut<T> for [T] {
         predicate: P,
     ) -> ExponentialGroupByMut<'a, T, P>
     where
-        P: FnMut(&T, &T) -> bool,
+        P: FnMut(&'a T, &'a T) -> bool,
     {
         ExponentialGroupByMut::new(self, predicate)
     }
