@@ -223,9 +223,9 @@ where
 /// assert!(match r { Ok(1..=4) => true, _ => false, });
 /// ```
 #[inline]
-pub fn exponential_search_by<T, F>(slice: &[T], mut f: F) -> Result<usize, usize>
+pub fn exponential_search_by<'a, T, F>(slice: &'a [T], mut f: F) -> Result<usize, usize>
 where
-    F: FnMut(&T) -> Ordering,
+    F: FnMut(&'a T) -> Ordering,
 {
     let mut index = 1;
     while index < slice.len() && f(&slice[index]) == Ordering::Less {

@@ -19,7 +19,7 @@ macro_rules! binary_group_by_key {
 
         impl<'a, T: 'a, F, K> std::iter::Iterator for $name<'a, T, F>
         where
-            F: FnMut(&T) -> K,
+            F: FnMut(&'a T) -> K,
             K: PartialEq,
         {
             type Item = $elem;
@@ -35,7 +35,7 @@ macro_rules! binary_group_by_key {
                 let len = self.remainder_len();
                 let tail = unsafe { $mkslice(self.ptr.add(1), len - 1) };
 
-                let predicate = |x: &T| {
+                let predicate = |x: &'a T| {
                     if (self.func)(first) == (self.func)(x) {
                         Less
                     } else {
@@ -66,7 +66,7 @@ macro_rules! binary_group_by_key {
 
         impl<'a, T: 'a, F, K> std::iter::DoubleEndedIterator for $name<'a, T, F>
         where
-            F: FnMut(&T) -> K,
+            F: FnMut(&'a T) -> K,
             K: PartialEq,
         {
             #[inline]
@@ -80,7 +80,7 @@ macro_rules! binary_group_by_key {
                 let len = self.remainder_len();
                 let head = unsafe { $mkslice(self.ptr, len - 1) };
 
-                let predicate = |x: &T| {
+                let predicate = |x: &'a T| {
                     if (self.func)(last) == (self.func)(x) {
                         Greater
                     } else {
@@ -98,7 +98,7 @@ macro_rules! binary_group_by_key {
 
         impl<'a, T: 'a, F, K> std::iter::FusedIterator for $name<'a, T, F>
         where
-            F: FnMut(&T) -> K,
+            F: FnMut(&'a T) -> K,
             K: PartialEq,
         {
         }
@@ -130,7 +130,7 @@ impl<'a, T: 'a, F> BinaryGroupByKey<'a, T, F> {
 impl<'a, T, F> BinaryGroupByKey<'a, T, F> {
     /// Returns the remainder of the original slice that is going to be
     /// returned by the iterator.
-    pub fn remainder(&self) -> &[T] {
+    pub fn remainder(&self) -> &'a [T] {
         let len = self.remainder_len();
         unsafe { from_raw_parts(self.ptr, len) }
     }

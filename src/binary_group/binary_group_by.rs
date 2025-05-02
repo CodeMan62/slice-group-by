@@ -19,7 +19,7 @@ macro_rules! binary_group_by {
 
         impl<'a, T: 'a, P> std::iter::Iterator for $name<'a, T, P>
         where
-            P: FnMut(&T, &T) -> bool,
+            P: FnMut(&'a T, &'a T) -> bool,
         {
             type Item = $elem;
 
@@ -34,7 +34,7 @@ macro_rules! binary_group_by {
                 let len = self.remainder_len();
                 let tail = unsafe { $mkslice(self.ptr.add(1), len - 1) };
 
-                let predicate = |x: &T| {
+                let predicate = |x: &'a T| {
                     if (self.predicate)(first, x) {
                         Less
                     } else {
@@ -65,7 +65,7 @@ macro_rules! binary_group_by {
 
         impl<'a, T: 'a, P> std::iter::DoubleEndedIterator for $name<'a, T, P>
         where
-            P: FnMut(&T, &T) -> bool,
+            P: FnMut(&'a T, &'a T) -> bool,
         {
             #[inline]
             fn next_back(&mut self) -> Option<Self::Item> {
@@ -78,7 +78,7 @@ macro_rules! binary_group_by {
                 let len = self.remainder_len();
                 let head = unsafe { $mkslice(self.ptr, len - 1) };
 
-                let predicate = |x: &T| {
+                let predicate = |x: &'a T| {
                     if (self.predicate)(last, x) {
                         Greater
                     } else {
@@ -95,7 +95,7 @@ macro_rules! binary_group_by {
         }
 
         impl<'a, T: 'a, P> std::iter::FusedIterator for $name<'a, T, P> where
-            P: FnMut(&T, &T) -> bool
+            P: FnMut(&'a T, &'a T) -> bool
         {
         }
     };
@@ -156,7 +156,7 @@ pub struct BinaryGroupByMut<'a, T, P> {
 
 impl<'a, T: 'a, P> BinaryGroupByMut<'a, T, P>
 where
-    P: FnMut(&T, &T) -> bool,
+    P: FnMut(&'a T, &'a T) -> bool,
 {
     pub fn new(slice: &'a mut [T], predicate: P) -> Self {
         let ptr = slice.as_mut_ptr();

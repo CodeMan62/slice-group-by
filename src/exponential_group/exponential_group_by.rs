@@ -19,7 +19,7 @@ macro_rules! exponential_group_by {
 
         impl<'a, T: 'a, P> std::iter::Iterator for $name<'a, T, P>
         where
-            P: FnMut(&T, &T) -> bool,
+            P: FnMut(&'a T, &'a T) -> bool,
         {
             type Item = $elem;
 
@@ -33,7 +33,7 @@ macro_rules! exponential_group_by {
                 let len = self.remainder_len();
                 let tail = unsafe { $mkslice(self.ptr.add(1), len - 1) };
 
-                let predicate = |x: &T| {
+                let predicate = |x: &'a T| {
                     if (self.predicate)(first, x) {
                         Less
                     } else {
@@ -64,7 +64,7 @@ macro_rules! exponential_group_by {
 
         impl<'a, T: 'a, P> std::iter::DoubleEndedIterator for $name<'a, T, P>
         where
-            P: FnMut(&T, &T) -> bool,
+            P: FnMut(&'a T, &'a T) -> bool,
         {
             fn next_back(&mut self) -> Option<Self::Item> {
                 if self.is_empty() {
@@ -76,7 +76,7 @@ macro_rules! exponential_group_by {
                 let len = self.remainder_len();
                 let head = unsafe { $mkslice(self.ptr, len - 1) };
 
-                let predicate = |x: &T| {
+                let predicate = |x: &'a T| {
                     if (self.predicate)(last, x) {
                         Greater
                     } else {
@@ -93,7 +93,7 @@ macro_rules! exponential_group_by {
         }
 
         impl<'a, T: 'a, P> std::iter::FusedIterator for $name<'a, T, P> where
-            P: FnMut(&T, &T) -> bool
+            P: FnMut(&'a T, &'a T) -> bool
         {
         }
     };
@@ -112,7 +112,7 @@ pub struct ExponentialGroupBy<'a, T, P> {
 
 impl<'a, T: 'a, P> ExponentialGroupBy<'a, T, P>
 where
-    P: FnMut(&T, &T) -> bool,
+    P: FnMut(&'a T, &'a T) -> bool,
 {
     pub fn new(slice: &'a [T], predicate: P) -> Self {
         ExponentialGroupBy {
@@ -157,7 +157,7 @@ pub struct ExponentialGroupByMut<'a, T, P> {
 
 impl<'a, T: 'a, P> ExponentialGroupByMut<'a, T, P>
 where
-    P: FnMut(&T, &T) -> bool,
+    P: FnMut(&'a T, &'a T) -> bool,
 {
     pub fn new(slice: &'a mut [T], predicate: P) -> Self {
         let ptr = slice.as_mut_ptr();

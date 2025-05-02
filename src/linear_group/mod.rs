@@ -12,14 +12,14 @@ mod tests {
 
     #[derive(Debug, Eq)]
     enum Guard {
-        Valid(i32),
-        Invalid(i32),
+        Valid,
+        Invalid,
     }
 
     impl PartialEq for Guard {
         fn eq(&self, other: &Self) -> bool {
             match (self, other) {
-                (Guard::Valid(_), Guard::Valid(_)) => true,
+                (Guard::Valid, Guard::Valid) => true,
                 (a, b) => panic!("denied read on Guard::Invalid variant ({:?}, {:?})", a, b),
             }
         }
@@ -83,11 +83,11 @@ mod tests {
 
     #[test]
     fn overflow() {
-        let slice = &[Guard::Invalid(0), Guard::Valid(1), Guard::Valid(2), Guard::Invalid(3)];
+        let slice = &[Guard::Invalid, Guard::Valid, Guard::Valid, Guard::Invalid];
 
         let mut iter = LinearGroup::new(&slice[1..3]);
 
-        assert_eq!(iter.next(), Some(&[Guard::Valid(1), Guard::Valid(2)][..]));
+        assert_eq!(iter.next(), Some(&[Guard::Valid, Guard::Valid][..]));
         assert_eq!(iter.next(), None);
     }
 
@@ -111,13 +111,13 @@ mod tests {
 
     #[test]
     fn last_overflow() {
-        let slice = &[Guard::Invalid(0), Guard::Valid(1), Guard::Valid(2), Guard::Invalid(3)];
+        let slice = &[Guard::Invalid, Guard::Valid, Guard::Valid, Guard::Invalid];
 
         println!("{:?}", (&slice[1..3]).as_ptr());
 
         let iter = LinearGroup::new(&slice[1..3]);
 
-        assert_eq!(iter.last(), Some(&[Guard::Valid(1), Guard::Valid(2)][..]));
+        assert_eq!(iter.last(), Some(&[Guard::Valid, Guard::Valid][..]));
     }
 
     #[test]
@@ -204,8 +204,11 @@ mod tests {
     }
 
     fn panic_param_ord(a: &i32, b: &i32) -> bool {
-        if a < b { true }
-        else { panic!("params are not in the right order") }
+        if a < b {
+            true
+        } else {
+            panic!("params are not in the right order")
+        }
     }
 
     #[test]
@@ -244,13 +247,13 @@ mod tests {
 
 #[cfg(all(feature = "nightly", test))]
 mod bench {
-    extern crate test;
     extern crate rand;
+    extern crate test;
 
-    use super::*;
-    use self::rand::{Rng, SeedableRng};
-    use self::rand::rngs::StdRng;
     use self::rand::distributions::Alphanumeric;
+    use self::rand::rngs::StdRng;
+    use self::rand::{Rng, SeedableRng};
+    use super::*;
 
     #[bench]
     fn vector_16_000(b: &mut test::Bencher) {

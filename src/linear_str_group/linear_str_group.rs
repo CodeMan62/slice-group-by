@@ -14,7 +14,7 @@ impl<'a> LinearStrGroup<'a> {
     }
 }
 
-str_group_by_wrapped!{ struct LinearStrGroup, &'a str }
+str_group_by_wrapped! { struct LinearStrGroup, &'a str }
 
 /// An iterator that will return non-overlapping *mutable* groups of equal `char`
 /// in the `str` using *linear/sequential search*.
@@ -25,7 +25,7 @@ str_group_by_wrapped!{ struct LinearStrGroup, &'a str }
 pub struct LinearStrGroupMut<'a>(LinearStrGroupByMut<'a, fn(char, char) -> bool>);
 
 impl<'a> LinearStrGroupMut<'a> {
-    pub fn new(string: &'a mut str) -> LinearStrGroupMut {
+    pub fn new(string: &'a mut str) -> LinearStrGroupMut<'a> {
         LinearStrGroupMut(LinearStrGroupByMut::new(string, |a, b| a == b))
     }
 
@@ -35,4 +35,4 @@ impl<'a> LinearStrGroupMut<'a> {
     }
 }
 
-str_group_by_wrapped!{ struct LinearStrGroupMut, &'a mut str }
+str_group_by_wrapped! { struct LinearStrGroupMut, &'a mut str }
